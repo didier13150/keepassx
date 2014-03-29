@@ -89,8 +89,12 @@ endmacro(add_unit_test)
 
 set(TEST_LIBRARIES
     keepassx_core
+    Qocoa
+    qjson
+    ${MHD_LIBRARIES}
     ${QT_QTCORE_LIBRARY}
     ${QT_QTGUI_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
     ${QT_QTTEST_LIBRARY}
     ${GCRYPT_LIBRARIES}
     ${ZLIB_LIBRARIES}
