@@ -31,6 +31,7 @@ public:
     void setAlgorithm(SymmetricCipher::Algorithm algo);
     void setMode(SymmetricCipher::Mode mode);
     void setDirection(SymmetricCipher::Direction direction);
+    void init();
     void setKey(const QByteArray& key);
     void setIv(const QByteArray& iv);
 

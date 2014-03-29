@@ -24,6 +24,7 @@ class SymmetricCipherBackend
 {
 public:
     virtual ~SymmetricCipherBackend() {}
+    virtual void init() = 0;
     virtual void setKey(const QByteArray& key) = 0;
     virtual void setIv(const QByteArray& iv) = 0;
 
