@@ -13,7 +13,7 @@
     <method name="openDatabase">
       <arg name="fileName" type="s" direction="in"/>
     </method>
-    <method name="forceExit">
+    <method name="exit">
     </method>
     <method name="closeAllDatabases">
     </method>

@@ -18,12 +18,12 @@
 #include "Config.h"
 
 #include <QCoreApplication>
-#include <QDesktopServices>
 #include <QDir>
 #include <QSettings>
+#include <QStandardPaths>
 #include <QTemporaryFile>
 
-Config* Config::m_instance(Q_NULLPTR);
+Config* Config::m_instance(nullptr);
 
 QVariant Config::get(const QString& key)
 {
@@ -53,7 +53,7 @@ Config::Config(QObject* parent)
     QString homePath = QDir::homePath();
 
 #if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
-    // we can't use QDesktopServices on X11 as it uses XDG_DATA_HOME instead of XDG_CONFIG_HOME
+    // we can't use QStandardPaths on X11 as it uses XDG_DATA_HOME instead of XDG_CONFIG_HOME
     QByteArray env = qgetenv("XDG_CONFIG_HOME");
     if (env.isEmpty()) {
         userPath = homePath;
@@ -70,7 +70,7 @@ Config::Config(QObject* parent)
 
     userPath += "/keepassx/";
 #else
-    userPath = QDir::fromNativeSeparators(QDesktopServices::storageLocation(QDesktopServices::DataLocation));
+    userPath = QDir::fromNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::DataLocation));
     // storageLocation() appends the application name ("/keepassx") to the end
     userPath += "/";
 #endif
@@ -89,8 +89,8 @@ void Config::init(const QString& fileName)
     m_settings.reset(new QSettings(fileName, QSettings::IniFormat));
 
     m_defaults.insert("RememberLastDatabases", true);
+    m_defaults.insert("RememberLastKeyFiles", true);
     m_defaults.insert("OpenPreviousDatabasesOnStartup", true);
-    m_defaults.insert("ModifiedOnExpandedStateChanges", true);
     m_defaults.insert("AutoSaveAfterEveryChange", false);
     m_defaults.insert("AutoSaveOnExit", false);
     m_defaults.insert("ShowToolbar", true);
@@ -104,7 +104,8 @@ void Config::init(const QString& fileName)
     m_defaults.insert("security/passwordscleartext", false);
     m_defaults.insert("security/autotypeask", true);
     m_defaults.insert("GUI/Language", "system");
-    m_defaults.insert("SystemTrayIcon", false);
+    m_defaults.insert("GUI/ShowTrayIcon", false);
+    m_defaults.insert("GUI/MinimizeToTray", false);
 }
 
 Config* Config::instance()

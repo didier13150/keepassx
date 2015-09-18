@@ -24,7 +24,6 @@
 #include <QImage>
 #include <QPointer>
 
-#include "core/Global.h"
 #include "core/Uuid.h"
 
 class Database;
@@ -35,7 +34,7 @@ class Metadata : public QObject
     Q_OBJECT
 
 public:
-    explicit Metadata(QObject* parent = Q_NULLPTR);
+    explicit Metadata(QObject* parent = nullptr);
 
     struct MetadataData
     {
@@ -115,6 +114,7 @@ public:
     void setProtectNotes(bool value);
     // void setAutoEnableVisualHiding(bool value);
     void addCustomIcon(const Uuid& uuid, const QImage& icon);
+    void addCustomIconScaled(const Uuid& uuid, const QImage& icon);
     void removeCustomIcon(const Uuid& uuid);
     void copyCustomIcons(const QSet<Uuid>& iconList, const Metadata* otherMetadata);
     void setRecycleBinEnabled(bool value);

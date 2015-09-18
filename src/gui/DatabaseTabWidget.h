@@ -28,12 +28,14 @@ class DatabaseWidget;
 class DatabaseWidgetStateSync;
 class DatabaseOpenWidget;
 class QFile;
+class QLockFile;
 
 struct DatabaseManagerStruct
 {
     DatabaseManagerStruct();
 
     DatabaseWidget* dbWidget;
+    QLockFile* lockFile;
     QString filePath;
     QString canonicalFilePath;
     QString fileName;
@@ -49,7 +51,7 @@ class DatabaseTabWidget : public QTabWidget
     Q_OBJECT
 
 public:
-    explicit DatabaseTabWidget(QWidget* parent = Q_NULLPTR);
+    explicit DatabaseTabWidget(QWidget* parent = nullptr);
     ~DatabaseTabWidget();
     void openDatabase(const QString& fileName, const QString& pw = QString(),
                       const QString& keyFile = QString());
@@ -62,8 +64,9 @@ public Q_SLOTS:
     void newDatabase();
     void openDatabase();
     void importKeePass1Database();
-    void saveDatabase(int index = -1);
-    void saveDatabaseAs(int index = -1);
+    bool saveDatabase(int index = -1);
+    bool saveDatabaseAs(int index = -1);
+    void exportToCsv();
     bool closeDatabase(int index = -1);
     void closeDatabaseFromSender();
     bool closeAllDatabases();
@@ -88,8 +91,8 @@ private Q_SLOTS:
     void emitActivateDatabaseChanged();
 
 private:
-    void saveDatabase(Database* db);
-    void saveDatabaseAs(Database* db);
+    bool saveDatabase(Database* db);
+    bool saveDatabaseAs(Database* db);
     bool closeDatabase(Database* db);
     void deleteDatabase(Database* db);
     int databaseIndex(Database* db);
@@ -98,7 +101,7 @@ private:
     Database* databaseFromDatabaseWidget(DatabaseWidget* dbWidget);
     void insertDatabase(Database* db, const DatabaseManagerStruct& dbStruct);
     void updateLastDatabases(const QString& filename);
-    void connectDatabase(Database* newDb, Database* oldDb = Q_NULLPTR);
+    void connectDatabase(Database* newDb, Database* oldDb = nullptr);
 
     KeePass2Writer m_writer;
     QHash<Database*, DatabaseManagerStruct> m_dbList;

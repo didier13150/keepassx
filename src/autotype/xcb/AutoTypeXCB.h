@@ -16,8 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef KEEPASSX_AUTOTYPEX11_H
-#define KEEPASSX_AUTOTYPEX11_H
+#ifndef KEEPASSX_AUTOTYPEXCB_H
+#define KEEPASSX_AUTOTYPEXCB_H
 
 #include <QApplication>
 #include <QSet>
@@ -31,18 +31,18 @@
 
 #include "autotype/AutoTypePlatformPlugin.h"
 #include "autotype/AutoTypeAction.h"
-#include "core/Global.h"
 
 #define N_MOD_INDICES (Mod5MapIndex + 1)
 
 class AutoTypePlatformX11 : public QObject, public AutoTypePlatformInterface
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID "org.keepassx.AutoTypePlatformX11")
     Q_INTERFACES(AutoTypePlatformInterface)
 
 public:
     AutoTypePlatformX11();
-    void unload() Q_DECL_OVERRIDE;
+    void unload() override;
     QStringList windowTitles();
     WId activeWindow();
     QString activeWindowTitle();
@@ -127,4 +127,4 @@ private:
     AutoTypePlatformX11* const m_platform;
 };
 
-#endif // KEEPASSX_AUTOTYPEX11_H
+#endif // KEEPASSX_AUTOTYPEXCB_H

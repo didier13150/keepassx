@@ -25,6 +25,7 @@
 #include <QLineEdit>
 #include <QSplitter>
 #include <QTimer>
+#include <QProcess>
 
 #include "autotype/AutoType.h"
 #include "core/Config.h"
@@ -50,9 +51,9 @@ DatabaseWidget::DatabaseWidget(Database* db, QWidget* parent)
     , m_db(db)
     , m_searchUi(new Ui::SearchWidget())
     , m_searchWidget(new QWidget())
-    , m_newGroup(Q_NULLPTR)
-    , m_newEntry(Q_NULLPTR)
-    , m_newParent(Q_NULLPTR)
+    , m_newGroup(nullptr)
+    , m_newEntry(nullptr)
+    , m_newParent(nullptr)
 {
     m_searchUi->setupUi(m_searchWidget);
 
@@ -172,7 +173,7 @@ DatabaseWidget::~DatabaseWidget()
 
 DatabaseWidget::Mode DatabaseWidget::currentMode() const
 {
-    if (currentWidget() == Q_NULLPTR) {
+    if (currentWidget() == nullptr) {
         return DatabaseWidget::None;
     }
     else if (currentWidget() == m_mainWidget) {
@@ -188,14 +189,7 @@ DatabaseWidget::Mode DatabaseWidget::currentMode() const
 
 bool DatabaseWidget::isInEditMode() const
 {
-    if (currentMode() == DatabaseWidget::LockedMode) {
-        return m_widgetBeforeLock != Q_NULLPTR
-                && m_widgetBeforeLock != m_mainWidget
-                && m_widgetBeforeLock != m_unlockDatabaseWidget;
-    }
-    else {
-        return currentMode() == DatabaseWidget::EditMode;
-    }
+    return currentMode() == DatabaseWidget::EditMode;
 }
 
 QList<int> DatabaseWidget::splitterSizes() const
@@ -229,6 +223,13 @@ void DatabaseWidget::setEntryViewHeaderSizes(const QList<int>& sizes)
     for (int i = 0; i < sizes.size(); i++) {
         m_entryView->header()->resizeSection(i, sizes[i]);
     }
+}
+
+void DatabaseWidget::clearAllWidgets()
+{
+    m_editEntryWidget->clear();
+    m_historyEditEntryWidget->clear();
+    m_editGroupWidget->clear();
 }
 
 void DatabaseWidget::emitCurrentModeChanged()
@@ -272,6 +273,15 @@ void DatabaseWidget::setIconFromParent()
     else {
         m_newEntry->setIcon(m_newParent->iconUuid());
     }
+}
+
+void DatabaseWidget::replaceDatabase(Database* db)
+{
+    Database* oldDb = m_db;
+    m_db = db;
+    m_groupView->changeDatabase(m_db);
+    Q_EMIT databaseChanged(m_db);
+    delete oldDb;
 }
 
 void DatabaseWidget::cloneEntry()
@@ -443,8 +453,19 @@ void DatabaseWidget::openUrl()
 
 void DatabaseWidget::openUrlForEntry(Entry* entry)
 {
-    if (!entry->url().isEmpty()) {
-        QDesktopServices::openUrl(entry->url());
+    QString urlString = entry->resolvePlaceholders(entry->url());
+    if (urlString.isEmpty()) {
+        return;
+    }
+
+    if (urlString.startsWith("cmd://")) {
+        if (urlString.length() > 6) {
+            QProcess::startDetached(urlString.mid(6));
+        }
+    }
+    else {
+        QUrl url = QUrl::fromUserInput(urlString);
+        QDesktopServices::openUrl(url);
     }
 }
 
@@ -531,8 +552,8 @@ void DatabaseWidget::switchToView(bool accepted)
             delete m_newGroup;
         }
 
-        m_newGroup = Q_NULLPTR;
-        m_newParent = Q_NULLPTR;
+        m_newGroup = nullptr;
+        m_newParent = nullptr;
     }
     else if (m_newEntry) {
         if (accepted) {
@@ -544,8 +565,8 @@ void DatabaseWidget::switchToView(bool accepted)
             delete m_newEntry;
         }
 
-        m_newEntry = Q_NULLPTR;
-        m_newParent = Q_NULLPTR;
+        m_newEntry = nullptr;
+        m_newParent = nullptr;
     }
 
     setCurrentWidget(m_mainWidget);
@@ -590,8 +611,13 @@ void DatabaseWidget::updateMasterKey(bool accepted)
 {
     if (accepted) {
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-        m_db->setKey(m_changeMasterKeyWidget->newMasterKey());
+        bool result = m_db->setKey(m_changeMasterKeyWidget->newMasterKey());
         QApplication::restoreOverrideCursor();
+
+        if (!result) {
+            MessageBox::critical(this, tr("Error"), tr("Unable to calculate master key"));
+            return;
+        }
     }
     else if (!m_db->hasKey()) {
         Q_EMIT closeRequest();
@@ -604,19 +630,15 @@ void DatabaseWidget::updateMasterKey(bool accepted)
 void DatabaseWidget::openDatabase(bool accepted)
 {
     if (accepted) {
-        Database* oldDb = m_db;
-        m_db = static_cast<DatabaseOpenWidget*>(sender())->database();
-        m_groupView->changeDatabase(m_db);
-        Q_EMIT databaseChanged(m_db);
-        delete oldDb;
+        replaceDatabase(static_cast<DatabaseOpenWidget*>(sender())->database());
         setCurrentWidget(m_mainWidget);
 
         // We won't need those anymore and KeePass1OpenWidget closes
         // the file in its dtor.
         delete m_databaseOpenWidget;
-        m_databaseOpenWidget = Q_NULLPTR;
+        m_databaseOpenWidget = nullptr;
         delete m_keepass1OpenWidget;
-        m_keepass1OpenWidget = Q_NULLPTR;
+        m_keepass1OpenWidget = nullptr;
     }
     else {
         if (m_databaseOpenWidget->database()) {
@@ -628,11 +650,24 @@ void DatabaseWidget::openDatabase(bool accepted)
 
 void DatabaseWidget::unlockDatabase(bool accepted)
 {
-    // cancel button is disabled
-    Q_ASSERT(accepted);
-    Q_UNUSED(accepted);
+    if (!accepted) {
+        Q_EMIT closeRequest();
+        return;
+    }
 
-    setCurrentWidget(m_widgetBeforeLock);
+    replaceDatabase(static_cast<DatabaseOpenWidget*>(sender())->database());
+
+    QList<Group*> groups = m_db->rootGroup()->groupsRecursive(true);
+    Q_FOREACH (Group* group, groups) {
+        if (group->uuid() == m_groupBeforeLock) {
+            m_groupView->setCurrentGroup(group);
+            break;
+        }
+    }
+
+    m_groupBeforeLock = Uuid();
+    setCurrentWidget(m_mainWidget);
+    m_unlockDatabaseWidget->clearForms();
     Q_EMIT unlockedDatabase();
 }
 
@@ -702,14 +737,12 @@ void DatabaseWidget::switchToImportKeepass1(const QString& fileName)
     setCurrentWidget(m_keepass1OpenWidget);
 }
 
-void DatabaseWidget::toggleSearch()
+void DatabaseWidget::openSearch()
 {
     if (isInSearchMode()) {
-        if (m_searchUi->searchEdit->hasFocus()) {
-            closeSearch();
-        }
-        else {
-            m_searchUi->searchEdit->selectAll();
+        m_searchUi->searchEdit->selectAll();
+
+        if (!m_searchUi->searchEdit->hasFocus()) {
             m_searchUi->searchEdit->setFocus();
             // make sure the search action is checked again
             emitCurrentModeChanged();
@@ -848,7 +881,7 @@ bool DatabaseWidget::isInSearchMode() const
 void DatabaseWidget::clearLastGroup(Group* group)
 {
     if (group) {
-        m_lastGroup = Q_NULLPTR;
+        m_lastGroup = nullptr;
         m_searchWidget->hide();
     }
 }
@@ -856,10 +889,23 @@ void DatabaseWidget::clearLastGroup(Group* group)
 void DatabaseWidget::lock()
 {
     Q_ASSERT(currentMode() != DatabaseWidget::LockedMode);
+    if (isInSearchMode()) {
+        closeSearch();
+    }
 
-    m_widgetBeforeLock = currentWidget();
-    m_unlockDatabaseWidget->load(m_filename, m_db);
+    if (m_groupView->currentGroup()) {
+        m_groupBeforeLock = m_groupView->currentGroup()->uuid();
+    }
+    else {
+        m_groupBeforeLock = m_db->rootGroup()->uuid();
+    }
+
+    clearAllWidgets();
+    m_unlockDatabaseWidget->load(m_filename);
     setCurrentWidget(m_unlockDatabaseWidget);
+    Database* newDb = new Database();
+    newDb->metadata()->setName(m_db->metadata()->name());
+    replaceDatabase(newDb);
 }
 
 void DatabaseWidget::updateFilename(const QString& fileName)
@@ -884,5 +930,55 @@ QStringList DatabaseWidget::customEntryAttributes() const
 
 bool DatabaseWidget::isGroupSelected() const
 {
-    return m_groupView->currentGroup() != Q_NULLPTR;
+    return m_groupView->currentGroup() != nullptr;
+}
+
+bool DatabaseWidget::currentEntryHasTitle()
+{
+    Entry* currentEntry = m_entryView->currentEntry();
+    if (!currentEntry) {
+        Q_ASSERT(false);
+        return false;
+    }
+    return !currentEntry->title().isEmpty();
+}
+
+bool DatabaseWidget::currentEntryHasUsername()
+{
+    Entry* currentEntry = m_entryView->currentEntry();
+    if (!currentEntry) {
+        Q_ASSERT(false);
+        return false;
+    }
+    return !currentEntry->username().isEmpty();
+}
+
+bool DatabaseWidget::currentEntryHasPassword()
+{
+    Entry* currentEntry = m_entryView->currentEntry();
+    if (!currentEntry) {
+        Q_ASSERT(false);
+        return false;
+    }
+    return !currentEntry->password().isEmpty();
+}
+
+bool DatabaseWidget::currentEntryHasUrl()
+{
+    Entry* currentEntry = m_entryView->currentEntry();
+    if (!currentEntry) {
+        Q_ASSERT(false);
+        return false;
+    }
+    return !currentEntry->url().isEmpty();
+}
+
+bool DatabaseWidget::currentEntryHasNotes()
+{
+    Entry* currentEntry = m_entryView->currentEntry();
+    if (!currentEntry) {
+        Q_ASSERT(false);
+        return false;
+    }
+    return !currentEntry->notes().isEmpty();
 }

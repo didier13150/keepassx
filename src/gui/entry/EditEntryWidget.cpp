@@ -23,8 +23,10 @@
 
 #include <QDesktopServices>
 #include <QStackedLayout>
+#include <QStandardPaths>
 #include <QMenu>
 #include <QSortFilterProxyModel>
+#include <QTemporaryFile>
 
 #include "core/Config.h"
 #include "core/Database.h"
@@ -44,7 +46,7 @@
 
 EditEntryWidget::EditEntryWidget(QWidget* parent)
     : EditWidget(parent)
-    , m_entry(Q_NULLPTR)
+    , m_entry(nullptr)
     , m_mainUi(new Ui::EditEntryWidgetMain())
     , m_advancedUi(new Ui::EditEntryWidgetAdvanced())
     , m_autoTypeUi(new Ui::EditEntryWidgetAutoType())
@@ -107,7 +109,11 @@ void EditEntryWidget::setupAdvanced()
 
     m_attachmentsModel->setEntryAttachments(m_entryAttachments);
     m_advancedUi->attachmentsView->setModel(m_attachmentsModel);
+    connect(m_advancedUi->attachmentsView->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)),
+            SLOT(updateAttachmentButtonsEnabled(QModelIndex)));
+    connect(m_advancedUi->attachmentsView, SIGNAL(doubleClicked(QModelIndex)), SLOT(openAttachment(QModelIndex)));
     connect(m_advancedUi->saveAttachmentButton, SIGNAL(clicked()), SLOT(saveCurrentAttachment()));
+    connect(m_advancedUi->openAttachmentButton, SIGNAL(clicked()), SLOT(openCurrentAttachment()));
     connect(m_advancedUi->addAttachmentButton, SIGNAL(clicked()), SLOT(insertAttachment()));
     connect(m_advancedUi->removeAttachmentButton, SIGNAL(clicked()), SLOT(removeCurrentAttachment()));
 
@@ -227,9 +233,18 @@ void EditEntryWidget::useExpiryPreset(QAction* action)
 {
     m_mainUi->expireCheck->setChecked(true);
     TimeDelta delta = action->data().value<TimeDelta>();
-    QDateTime now = Tools::currentDateTimeUtc().toLocalTime();
+    QDateTime now = QDateTime::currentDateTime();
     QDateTime expiryDateTime = now + delta;
     m_mainUi->expireDatePicker->setDateTime(expiryDateTime);
+}
+
+void EditEntryWidget::updateAttachmentButtonsEnabled(const QModelIndex& current)
+{
+    bool enable = current.isValid();
+
+    m_advancedUi->saveAttachmentButton->setEnabled(enable);
+    m_advancedUi->openAttachmentButton->setEnabled(enable);
+    m_advancedUi->removeAttachmentButton->setEnabled(enable && !m_history);
 }
 
 QString EditEntryWidget::entryTitle() const
@@ -263,6 +278,7 @@ void EditEntryWidget::loadEntry(Entry* entry, bool create, bool history, const Q
     }
 
     setForms(entry);
+    setReadOnly(m_history);
 
     setCurrentRow(0);
     setRowHidden(m_historyWidget, m_history);
@@ -281,7 +297,7 @@ void EditEntryWidget::setForms(const Entry* entry, bool restore)
     m_mainUi->tooglePasswordGeneratorButton->setChecked(false);
     m_mainUi->passwordGenerator->reset();
     m_advancedUi->addAttachmentButton->setEnabled(!m_history);
-    m_advancedUi->removeAttachmentButton->setEnabled(!m_history);
+    updateAttachmentButtonsEnabled(m_advancedUi->attachmentsView->currentIndex());
     m_advancedUi->addAttributeButton->setEnabled(!m_history);
     m_advancedUi->editAttributeButton->setEnabled(false);
     m_advancedUi->removeAttributeButton->setEnabled(false);
@@ -370,10 +386,7 @@ void EditEntryWidget::setForms(const Entry* entry, bool restore)
 void EditEntryWidget::saveEntry()
 {
     if (m_history) {
-        m_entry = Q_NULLPTR;
-        m_database = Q_NULLPTR;
-        m_entryAttributes->clear();
-        m_entryAttachments->clear();
+        clear();
         Q_EMIT editFinished(false);
         return;
     }
@@ -439,12 +452,7 @@ void EditEntryWidget::saveEntry()
     }
 
 
-    m_entry = Q_NULLPTR;
-    m_database = Q_NULLPTR;
-    m_entryAttributes->clear();
-    m_entryAttachments->clear();
-    m_autoTypeAssoc->clear();
-    m_historyModel->clear();
+    clear();
 
     Q_EMIT editFinished(true);
 }
@@ -452,10 +460,7 @@ void EditEntryWidget::saveEntry()
 void EditEntryWidget::cancel()
 {
     if (m_history) {
-        m_entry = Q_NULLPTR;
-        m_database = Q_NULLPTR;
-        m_entryAttributes->clear();
-        m_entryAttachments->clear();
+        clear();
         Q_EMIT editFinished(false);
         return;
     }
@@ -465,14 +470,19 @@ void EditEntryWidget::cancel()
         m_entry->setIcon(Entry::DefaultIconNumber);
     }
 
-    m_entry = 0;
-    m_database = 0;
+    clear();
+
+    Q_EMIT editFinished(false);
+}
+
+void EditEntryWidget::clear()
+{
+    m_entry = nullptr;
+    m_database = nullptr;
     m_entryAttributes->clear();
     m_entryAttachments->clear();
     m_autoTypeAssoc->clear();
     m_historyModel->clear();
-
-    Q_EMIT editFinished(false);
 }
 
 void EditEntryWidget::togglePasswordGeneratorButton(bool checked)
@@ -580,7 +590,7 @@ void EditEntryWidget::insertAttachment()
 
     QString defaultDir = config()->get("LastAttachmentDir").toString();
     if (defaultDir.isEmpty() || !QDir(defaultDir).exists()) {
-        defaultDir = QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation);
+        defaultDir = QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).value(0);
     }
     QString filename = fileDialog()->getOpenFileName(this, tr("Select file"), defaultDir);
     if (filename.isEmpty() || !QFile::exists(filename)) {
@@ -614,7 +624,7 @@ void EditEntryWidget::saveCurrentAttachment()
     QString filename = m_attachmentsModel->keyByIndex(index);
     QString defaultDirName = config()->get("LastAttachmentDir").toString();
     if (defaultDirName.isEmpty() || !QDir(defaultDirName).exists()) {
-        defaultDirName = QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation);
+        defaultDirName = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
     }
     QDir dir(defaultDirName);
     QString savePath = fileDialog()->getSaveFileName(this, tr("Save attachment"),
@@ -634,6 +644,42 @@ void EditEntryWidget::saveCurrentAttachment()
             return;
         }
     }
+}
+
+void EditEntryWidget::openAttachment(const QModelIndex& index)
+{
+    if (!index.isValid()) {
+        Q_ASSERT(false);
+        return;
+    }
+
+    QString filename = m_attachmentsModel->keyByIndex(index);
+    QByteArray attachmentData = m_entryAttachments->value(filename);
+
+    // tmp file will be removed once the database (or the application) has been closed
+    QString tmpFileTemplate = QDir::temp().absoluteFilePath(QString("XXXXXX.").append(filename));
+    QTemporaryFile* file = new QTemporaryFile(tmpFileTemplate, this);
+
+    if (!file->open()) {
+        MessageBox::warning(this, tr("Error"),
+                tr("Unable to save the attachment:\n").append(file->errorString()));
+        return;
+    }
+
+    if (file->write(attachmentData) != attachmentData.size()) {
+        MessageBox::warning(this, tr("Error"),
+                tr("Unable to save the attachment:\n").append(file->errorString()));
+        return;
+    }
+
+    QDesktopServices::openUrl(QUrl::fromLocalFile(file->fileName()));
+}
+
+void EditEntryWidget::openCurrentAttachment()
+{
+    QModelIndex index = m_advancedUi->attachmentsView->currentIndex();
+
+    openAttachment(index);
 }
 
 void EditEntryWidget::removeCurrentAttachment()

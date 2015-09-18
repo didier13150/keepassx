@@ -52,7 +52,7 @@ class EditEntryWidget : public EditWidget
     Q_OBJECT
 
 public:
-    explicit EditEntryWidget(QWidget* parent = Q_NULLPTR);
+    explicit EditEntryWidget(QWidget* parent = nullptr);
     ~EditEntryWidget();
 
     void loadEntry(Entry* entry, bool create, bool history, const QString& parentName,
@@ -60,6 +60,7 @@ public:
 
     void createPresetsMenu(QMenu* expirePresetsMenu);
     QString entryTitle() const;
+    void clear();
 
 Q_SIGNALS:
     void editFinished(bool accepted);
@@ -76,6 +77,8 @@ private Q_SLOTS:
     void updateCurrentAttribute();
     void insertAttachment();
     void saveCurrentAttachment();
+    void openAttachment(const QModelIndex& index);
+    void openCurrentAttachment();
     void removeCurrentAttachment();
     void updateAutoTypeEnabled();
     void insertAutoTypeAssoc();
@@ -91,6 +94,7 @@ private Q_SLOTS:
     void histEntryActivated(const QModelIndex& index);
     void updateHistoryButtons(const QModelIndex& current, const QModelIndex& previous);
     void useExpiryPreset(QAction* action);
+    void updateAttachmentButtonsEnabled(const QModelIndex& current);
 
 private:
     void setupMain();

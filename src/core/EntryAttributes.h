@@ -23,15 +23,14 @@
 #include <QSet>
 #include <QStringList>
 
-#include "core/Global.h"
-
 class EntryAttributes : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit EntryAttributes(QObject* parent = Q_NULLPTR);
+    explicit EntryAttributes(QObject* parent = nullptr);
     QList<QString> keys() const;
+    bool hasKey(const QString& key) const;
     QList<QString> customKeys();
     QString value(const QString& key) const;
     bool isProtected(const QString& key) const;

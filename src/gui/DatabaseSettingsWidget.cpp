@@ -26,7 +26,7 @@
 DatabaseSettingsWidget::DatabaseSettingsWidget(QWidget* parent)
     : DialogyWidget(parent)
     , m_ui(new Ui::DatabaseSettingsWidget())
-    , m_db(Q_NULLPTR)
+    , m_db(nullptr)
 {
     m_ui->setupUi(this);
 
@@ -130,7 +130,10 @@ void DatabaseSettingsWidget::reject()
 void DatabaseSettingsWidget::transformRoundsBenchmark()
 {
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-    m_ui->transformRoundsSpinBox->setValue(CompositeKey::transformKeyBenchmark(1000));
+    int rounds = CompositeKey::transformKeyBenchmark(1000);
+    if (rounds != -1) {
+        m_ui->transformRoundsSpinBox->setValue(rounds);
+    }
     QApplication::restoreOverrideCursor();
 }
 

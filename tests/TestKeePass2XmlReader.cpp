@@ -71,6 +71,7 @@ void TestKeePass2XmlReader::initTestCase()
     QVERIFY(Crypto::init());
 
     KeePass2XmlReader reader;
+    reader.setStrictMode(true);
     QString xmlFile = QString(KEEPASSX_TEST_DATA_DIR).append("/NewDatabase.xml");
     m_db = reader.readDatabase(xmlFile);
     QVERIFY(m_db);
@@ -97,12 +98,12 @@ void TestKeePass2XmlReader::testMetadata()
     QCOMPARE(m_db->metadata()->protectUrl(), true);
     QCOMPARE(m_db->metadata()->protectNotes(), false);
     QCOMPARE(m_db->metadata()->recycleBinEnabled(), true);
-    QVERIFY(m_db->metadata()->recycleBin() != Q_NULLPTR);
+    QVERIFY(m_db->metadata()->recycleBin() != nullptr);
     QCOMPARE(m_db->metadata()->recycleBin()->name(), QString("Recycle Bin"));
     QCOMPARE(m_db->metadata()->recycleBinChanged(), genDT(2010, 8, 25, 16, 12, 57));
-    QVERIFY(m_db->metadata()->entryTemplatesGroup() == Q_NULLPTR);
+    QVERIFY(m_db->metadata()->entryTemplatesGroup() == nullptr);
     QCOMPARE(m_db->metadata()->entryTemplatesGroupChanged(), genDT(2010, 8, 8, 17, 24, 19));
-    QVERIFY(m_db->metadata()->lastSelectedGroup() != Q_NULLPTR);
+    QVERIFY(m_db->metadata()->lastSelectedGroup() != nullptr);
     QCOMPARE(m_db->metadata()->lastSelectedGroup()->name(), QString("NewDatabase"));
     QVERIFY(m_db->metadata()->lastTopVisibleGroup() == m_db->metadata()->lastSelectedGroup());
     QCOMPARE(m_db->metadata()->historyMaxItems(), -1);
@@ -357,23 +358,54 @@ void TestKeePass2XmlReader::testDeletedObjects()
 void TestKeePass2XmlReader::testBroken()
 {
     QFETCH(QString, baseName);
+    QFETCH(bool, strictMode);
+    QFETCH(bool, expectError);
 
     KeePass2XmlReader reader;
+    reader.setStrictMode(strictMode);
     QString xmlFile = QString("%1/%2.xml").arg(KEEPASSX_TEST_DATA_DIR, baseName);
     QVERIFY(QFile::exists(xmlFile));
     QScopedPointer<Database> db(reader.readDatabase(xmlFile));
-    QVERIFY(reader.hasError());
+    if (reader.hasError()) {
+        qWarning("Reader error: %s", qPrintable(reader.errorString()));
+    }
+    QCOMPARE(reader.hasError(), expectError);
 }
 
 void TestKeePass2XmlReader::testBroken_data()
 {
     QTest::addColumn<QString>("baseName");
+    QTest::addColumn<bool>("strictMode");
+    QTest::addColumn<bool>("expectError");
 
-    QTest::newRow("BrokenNoGroupUuid") << "BrokenNoGroupUuid";
-    QTest::newRow("BrokenNoEntryUuid") << "BrokenNoEntryUuid";
-    QTest::newRow("BrokenNoRootGroup") << "BrokenNoRootGroup";
-    QTest::newRow("BrokenTwoRoots") << "BrokenTwoRoots";
-    QTest::newRow("BrokenTwoRootGroups") << "BrokenTwoRootGroups";
+    //                                                    testfile                 strict?  error?
+    QTest::newRow("BrokenNoGroupUuid     (strict)")    << "BrokenNoGroupUuid"    << true  << true;
+    QTest::newRow("BrokenNoGroupUuid (not strict)")    << "BrokenNoGroupUuid"    << false << false;
+    QTest::newRow("BrokenNoEntryUuid     (strict)")    << "BrokenNoEntryUuid"    << true  << true;
+    QTest::newRow("BrokenNoEntryUuid (not strict)")    << "BrokenNoEntryUuid"    << false << false;
+    QTest::newRow("BrokenNoRootGroup     (strict)")    << "BrokenNoRootGroup"    << true  << true;
+    QTest::newRow("BrokenNoRootGroup (not strict)")    << "BrokenNoRootGroup"    << false << true;
+    QTest::newRow("BrokenTwoRoots     (strict)")       << "BrokenTwoRoots"       << true  << true;
+    QTest::newRow("BrokenTwoRoots (not strict)")       << "BrokenTwoRoots"       << false << true;
+    QTest::newRow("BrokenTwoRootGroups     (strict)")  << "BrokenTwoRootGroups"  << true  << true;
+    QTest::newRow("BrokenTwoRootGroups (not strict)")  << "BrokenTwoRootGroups"  << false << true;
+    QTest::newRow("BrokenGroupReference     (strict)") << "BrokenGroupReference" << true  << false;
+    QTest::newRow("BrokenGroupReference (not strict)") << "BrokenGroupReference" << false << false;
+    QTest::newRow("BrokenDeletedObjects     (strict)") << "BrokenDeletedObjects" << true  << true;
+    QTest::newRow("BrokenDeletedObjects (not strict)") << "BrokenDeletedObjects" << false << false;
+}
+
+void TestKeePass2XmlReader::testEmptyUuids()
+{
+    KeePass2XmlReader reader;
+    reader.setStrictMode(true);
+    QString xmlFile = QString("%1/%2.xml").arg(KEEPASSX_TEST_DATA_DIR, "EmptyUuids");
+    QVERIFY(QFile::exists(xmlFile));
+    QScopedPointer<Database> db(reader.readDatabase(xmlFile));
+    if (reader.hasError()) {
+        qWarning("Reader error: %s", qPrintable(reader.errorString()));
+    }
+    QVERIFY(!reader.hasError());
 }
 
 void TestKeePass2XmlReader::cleanupTestCase()

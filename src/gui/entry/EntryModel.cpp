@@ -27,9 +27,8 @@
 
 EntryModel::EntryModel(QObject* parent)
     : QAbstractTableModel(parent)
-    , m_group(Q_NULLPTR)
+    , m_group(nullptr)
 {
-    setSupportedDragActions(Qt::MoveAction | Qt::CopyAction);
 }
 
 Entry* EntryModel::entryFromIndex(const QModelIndex& index) const
@@ -72,7 +71,7 @@ void EntryModel::setEntryList(const QList<Entry*>& entries)
 
     severConnections();
 
-    m_group = Q_NULLPTR;
+    m_group = nullptr;
     m_allGroups.clear();
     m_entries = entries;
     m_orgEntries = entries;
@@ -85,7 +84,10 @@ void EntryModel::setEntryList(const QList<Entry*>& entries)
 
     Q_FOREACH (Database* db, databases) {
         Q_ASSERT(db);
-        m_allGroups.append(db->rootGroup()->groupsRecursive(true));
+        Q_FOREACH (const Group* group, db->rootGroup()->groupsRecursive(true)) {
+            m_allGroups.append(group);
+        }
+
         if (db->metadata()->recycleBin()) {
             m_allGroups.removeOne(db->metadata()->recycleBin());
         }
@@ -192,6 +194,11 @@ Qt::DropActions EntryModel::supportedDropActions() const
     return 0;
 }
 
+Qt::DropActions EntryModel::supportedDragActions() const
+{
+    return (Qt::MoveAction | Qt::CopyAction);
+}
+
 Qt::ItemFlags EntryModel::flags(const QModelIndex& modelIndex) const
 {
     if (!modelIndex.isValid()) {
@@ -212,7 +219,7 @@ QStringList EntryModel::mimeTypes() const
 QMimeData* EntryModel::mimeData(const QModelIndexList& indexes) const
 {
     if (indexes.isEmpty()) {
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     QMimeData* data = new QMimeData();
@@ -237,7 +244,7 @@ QMimeData* EntryModel::mimeData(const QModelIndexList& indexes) const
 
     if (seenEntries.isEmpty()) {
         delete data;
-        return Q_NULLPTR;
+        return nullptr;
     }
     else {
         data->setData(mimeTypes().first(), encoded);
@@ -295,11 +302,11 @@ void EntryModel::entryDataChanged(Entry* entry)
 void EntryModel::severConnections()
 {
     if (m_group) {
-        disconnect(m_group, Q_NULLPTR, this, Q_NULLPTR);
+        disconnect(m_group, nullptr, this, nullptr);
     }
 
     Q_FOREACH (const Group* group, m_allGroups) {
-        disconnect(group, Q_NULLPTR, this, Q_NULLPTR);
+        disconnect(group, nullptr, this, nullptr);
     }
 }
 

@@ -21,7 +21,7 @@
 #include <QScopedPointer>
 #include <QStackedWidget>
 
-#include "core/Global.h"
+#include "core/Uuid.h"
 
 #include "gui/entry/EntryModel.h"
 
@@ -58,7 +58,7 @@ public:
         LockedMode
     };
 
-    explicit DatabaseWidget(Database* db, QWidget* parent = Q_NULLPTR);
+    explicit DatabaseWidget(Database* db, QWidget* parent = nullptr);
     ~DatabaseWidget();
     Database* database();
     bool dbHasKey() const;
@@ -78,6 +78,12 @@ public:
     void setSplitterSizes(const QList<int>& sizes);
     QList<int> entryHeaderViewSizes() const;
     void setEntryViewHeaderSizes(const QList<int>& sizes);
+    void clearAllWidgets();
+    bool currentEntryHasTitle();
+    bool currentEntryHasUsername();
+    bool currentEntryHasPassword();
+    bool currentEntryHasUrl();
+    bool currentEntryHasNotes();
 
 Q_SIGNALS:
     void closeRequest();
@@ -117,7 +123,7 @@ public Q_SLOTS:
     void switchToOpenDatabase(const QString& fileName);
     void switchToOpenDatabase(const QString& fileName, const QString& password, const QString& keyFile);
     void switchToImportKeepass1(const QString& fileName);
-    void toggleSearch();
+    void openSearch();
 
 private Q_SLOTS:
     void entryActivationSignalReceived(Entry* entry, EntryModel::ModelColumn column);
@@ -143,6 +149,7 @@ private Q_SLOTS:
 private:
     void setClipboardTextAndMinimize(const QString& text);
     void setIconFromParent();
+    void replaceDatabase(Database* db);
 
     Database* m_db;
     const QScopedPointer<Ui::SearchWidget> m_searchUi;
@@ -164,8 +171,8 @@ private:
     Group* m_newParent;
     Group* m_lastGroup;
     QTimer* m_searchTimer;
-    QWidget* m_widgetBeforeLock;
     QString m_filename;
+    Uuid m_groupBeforeLock;
 };
 
 #endif // KEEPASSX_DATABASEWIDGET_H

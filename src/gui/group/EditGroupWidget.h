@@ -37,10 +37,11 @@ class EditGroupWidget : public EditWidget
     Q_OBJECT
 
 public:
-    explicit EditGroupWidget(QWidget* parent = Q_NULLPTR);
+    explicit EditGroupWidget(QWidget* parent = nullptr);
     ~EditGroupWidget();
 
     void loadGroup(Group* group, bool create, Database* database);
+    void clear();
 
 Q_SIGNALS:
     void editFinished(bool accepted);

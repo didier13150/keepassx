@@ -11,6 +11,10 @@
         <source>KeePassX is distributed under the term of the GNU General Public License (GPL) version 2 or (at your option) version 3.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Revision</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>AutoType</name>
@@ -19,7 +23,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Couldn&apos;t find an entry that matches the window title.</source>
+        <source>Couldn&apos;t find an entry that matches the window title:</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -109,6 +113,15 @@
     </message>
     <message>
         <source>Different passwords supplied.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed to set key file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed to set %1 as the Key file:
+%2</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -237,11 +250,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&quot;%1&quot; is in edit mode.
-Close anyway?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Save changes?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -268,6 +276,53 @@ Save changes?</source>
     </message>
     <message>
         <source>locked</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The database you are trying to open is locked by another instance of KeePassX.
+Do you want to open it anyway? Alternatively the database is opened read-only.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Lock database</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Can&apos;t lock the database as you are currently editing it.
+Please press cancel to finish your changes or discard them.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This database has never been saved.
+You can save the database or stop locking it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This database has been modified.
+Do you want to save the database before locking it?
+Otherwise your changes are lost.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&quot;%1&quot; is in edit mode.
+Discard changes and close anyway?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Export database to CSV file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>CSV file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Writing the CSV file failed.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The database you are trying to save as is locked by another instance of KeePassX.
+Do you want to save it anyway?</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -314,6 +369,14 @@ Save changes?</source>
     </message>
     <message>
         <source>Current group</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unable to calculate master key</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -431,6 +494,10 @@ Save changes?</source>
     </message>
     <message>
         <source>Save</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Open</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -584,6 +651,14 @@ Save changes?</source>
         <source>Auto-type</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Use default auto-type sequence of parent group</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set default auto-type sequence</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>EditWidgetIcons</name>
@@ -735,6 +810,10 @@ Save changes?</source>
         <source>Root</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Unable to calculate master key</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>KeePass2Reader</name>
@@ -748,6 +827,21 @@ Save changes?</source>
     </message>
     <message>
         <source>Wrong key or database file is corrupt.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unable to calculate master key</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>Main</name>
+    <message>
+        <source>Fatal error while testing the cryptographic functions.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>KeePassX - Error</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -775,10 +869,6 @@ Save changes?</source>
     </message>
     <message>
         <source>Groups</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Extras</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -858,15 +948,7 @@ Save changes?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Username</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Copy username to clipboard</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Password</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -907,6 +989,26 @@ Save changes?</source>
     </message>
     <message>
         <source>read-only</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Toggle window</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Tools</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Copy username</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Copy password</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Export to CSV file</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1090,10 +1192,6 @@ Save changes?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Mark as modified on expanded state changes</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Automatically save on exit</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1115,6 +1213,22 @@ Save changes?</source>
     </message>
     <message>
         <source>Use entry title to match windows for global auto-type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Language</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show a system tray icon</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Hide window to system tray when minimized</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remember last key files</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1147,14 +1261,6 @@ Save changes?</source>
         <source>Unlock database</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <source>Error</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Wrong key.</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>WelcomeWidget</name>
@@ -1175,10 +1281,6 @@ Save changes?</source>
     </message>
     <message>
         <source>path to a custom config file</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>password of the database (DANGEROUS!)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

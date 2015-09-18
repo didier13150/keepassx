@@ -20,7 +20,7 @@
 
 #include <QActionGroup>
 #include <QMainWindow>
-#include <QtGui/QSystemTrayIcon>
+#include <QSystemTrayIcon>
 
 #include "core/SignalMultiplexer.h"
 #include "gui/DatabaseWidget.h"
@@ -34,7 +34,7 @@ class InactivityTimer;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-#if defined(Q_WS_X11)
+#if defined(Q_OS_LINUX)
     Q_CLASSINFO("D-Bus Interface", "org.keepassx.MainWindow")
 #endif
 public:
@@ -44,11 +44,12 @@ public:
 public Q_SLOTS:
     void openDatabase(const QString& fileName, const QString& pw = QString(),
                       const QString& keyFile = QString());
-    void forceExit();
+    void exit();
     void closeAllDatabases();
 
 protected:
-     void closeEvent(QCloseEvent* event) Q_DECL_OVERRIDE;
+     void closeEvent(QCloseEvent* event) override;
+     void changeEvent(QEvent* event) override;
 
 private Q_SLOTS:
     void setMenuActionState(DatabaseWidget::Mode mode = DatabaseWidget::None);
@@ -66,9 +67,9 @@ private Q_SLOTS:
     void saveToolbarState(bool value);
     void rememberOpenDatabases(const QString& filePath);
     void applySettingsChanges();
-    void setupSystemTrayIcon(bool execute = true);
-    void toggleDisplay();
-    void toggleDisplay(QSystemTrayIcon::ActivationReason);
+    void trayIconTriggered(QSystemTrayIcon::ActivationReason reason);
+    void toggleWindow();
+    void lockDatabasesAfterInactivity();
 
 private:
     static void setShortcut(QAction* action, QKeySequence::StandardKey standard, int fallback = 0);
@@ -77,6 +78,8 @@ private:
 
     void saveWindowInformation();
     bool saveLastDatabases();
+    void updateTrayIcon();
+    bool isTrayIconEnabled() const;
 
     const QScopedPointer<Ui::MainWindow> m_ui;
     SignalMultiplexer m_actionMultiplexer;
@@ -84,12 +87,9 @@ private:
     QActionGroup* m_lastDatabasesActions;
     QActionGroup* m_copyAdditionalAttributeActions;
     QStringList m_openDatabases;
-    QSystemTrayIcon* m_systrayicon;
-    bool m_forceExit;
-    QAction* m_systrayShow;
-    QAction* m_systrayHide;
     InactivityTimer* m_inactivityTimer;
     int m_countDefaultAttributes;
+    QSystemTrayIcon* m_trayIcon;
 
     Q_DISABLE_COPY(MainWindow)
 };

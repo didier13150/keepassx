@@ -42,7 +42,7 @@ Metadata::Metadata(QObject* parent)
     m_data.protectNotes = false;
     // m_data.autoEnableVisualHiding = false;
 
-    QDateTime now = Tools::currentDateTimeUtc();
+    QDateTime now = QDateTime::currentDateTimeUtc();
     m_data.nameChanged = now;
     m_data.descriptionChanged = now;
     m_data.defaultUserNameChanged = now;
@@ -67,7 +67,7 @@ template <class P, class V> bool Metadata::set(P& property, const V& value, QDat
     if (property != value) {
         property = value;
         if (m_updateDatetime) {
-            dateTime = Tools::currentDateTimeUtc();
+            dateTime = QDateTime::currentDateTimeUtc();
         }
         Q_EMIT modified();
         return true;
@@ -341,6 +341,22 @@ void Metadata::addCustomIcon(const Uuid& uuid, const QImage& icon)
     m_customIconsOrder.append(uuid);
     Q_ASSERT(m_customIcons.count() == m_customIconsOrder.count());
     Q_EMIT modified();
+}
+
+void Metadata::addCustomIconScaled(const Uuid& uuid, const QImage& icon)
+{
+    QImage iconScaled;
+
+    // scale down to 128x128 if icon is larger
+    if (icon.width() > 128 || icon.height() > 128) {
+        iconScaled = icon.scaled(QSize(128, 128), Qt::KeepAspectRatio,
+                                 Qt::SmoothTransformation);
+    }
+    else {
+        iconScaled = icon;
+    }
+
+    addCustomIcon(uuid, iconScaled);
 }
 
 void Metadata::removeCustomIcon(const Uuid& uuid)

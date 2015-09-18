@@ -23,7 +23,6 @@
 
 #include "core/Group.h"
 #include "core/Metadata.h"
-#include "core/Tools.h"
 #include "crypto/Random.h"
 #include "format/KeePass2.h"
 
@@ -105,7 +104,7 @@ Entry* Database::recFindEntry(const Uuid& uuid, Group* group)
         }
     }
 
-    return Q_NULLPTR;
+    return nullptr;
 }
 
 Group* Database::resolveGroup(const Uuid& uuid)
@@ -126,7 +125,7 @@ Group* Database::recFindGroup(const Uuid& uuid, Group* group)
         }
     }
 
-    return Q_NULLPTR;
+    return nullptr;
 }
 
 QList<DeletedObject> Database::deletedObjects()
@@ -143,7 +142,7 @@ void Database::addDeletedObject(const DeletedObject& delObj)
 void Database::addDeletedObject(const Uuid& uuid)
 {
     DeletedObject delObj;
-    delObj.deletionTime = Tools::currentDateTimeUtc();
+    delObj.deletionTime = QDateTime::currentDateTimeUtc();
     delObj.uuid = uuid;
 
     addDeletedObject(delObj);
@@ -188,32 +187,51 @@ void Database::setCompressionAlgo(Database::CompressionAlgorithm algo)
     m_data.compressionAlgo = algo;
 }
 
-void Database::setTransformRounds(quint64 rounds)
+bool Database::setTransformRounds(quint64 rounds)
 {
     if (m_data.transformRounds != rounds) {
+        quint64 oldRounds = m_data.transformRounds;
+
         m_data.transformRounds = rounds;
 
         if (m_data.hasKey) {
-            setKey(m_data.key);
+            if (!setKey(m_data.key)) {
+                m_data.transformRounds = oldRounds;
+                return false;
+            }
         }
     }
+
+    return true;
 }
 
-void Database::setKey(const CompositeKey& key, const QByteArray& transformSeed, bool updateChangedTime)
+bool Database::setKey(const CompositeKey& key, const QByteArray& transformSeed,
+                      bool updateChangedTime)
 {
+    bool ok;
+    QString errorString;
+
+    QByteArray transformedMasterKey =
+            key.transform(transformSeed, transformRounds(), &ok, &errorString);
+    if (!ok) {
+        return false;
+    }
+
     m_data.key = key;
     m_data.transformSeed = transformSeed;
-    m_data.transformedMasterKey = key.transform(transformSeed, transformRounds());
+    m_data.transformedMasterKey = transformedMasterKey;
     m_data.hasKey = true;
     if (updateChangedTime) {
-        m_metadata->setMasterKeyChanged(Tools::currentDateTimeUtc());
+        m_metadata->setMasterKeyChanged(QDateTime::currentDateTimeUtc());
     }
     Q_EMIT modifiedImmediate();
+
+    return true;
 }
 
-void Database::setKey(const CompositeKey& key)
+bool Database::setKey(const CompositeKey& key)
 {
-    setKey(key, randomGen()->randomArray(32));
+    return setKey(key, randomGen()->randomArray(32));
 }
 
 bool Database::hasKey() const
