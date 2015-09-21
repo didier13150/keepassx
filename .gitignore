@@ -3,3 +3,4 @@ CMakeLists.txt.*
 build/
 .kdev_include_paths
 test.kdbx
+.directory
