@@ -517,11 +517,11 @@ void MainWindow::updateTrayIcon()
             
             menu->addSeparator();
             
-            QAction* lockDbAction = new QAction(tr("Lock Database"), menu);
+            QAction* lockDbAction = new QAction(tr("Lock databases"), menu);
             lockDbAction->setIcon(filePath()->icon("actions", "document-encrypt"));
             menu->addAction(lockDbAction);
             
-            QAction* closeDbAction = new QAction(tr("Close Database"), menu);
+            QAction* closeDbAction = new QAction(tr("Close database"), menu);
             closeDbAction->setIcon(filePath()->icon("actions", "document-close"));
             menu->addAction(closeDbAction);
             
