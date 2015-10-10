@@ -67,20 +67,13 @@
    <item>
     <widget class="QLabel" name="label_fork">
      <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This is a modified version from&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fork from &lt;a href=&quot;https://github.com/didier13150/keepassx&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#2980b9;&quot;&gt;https://github.com/didier13150/keepassx&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="wordWrap">
       <bool>false</bool>
      </property>
      <property name="openExternalLinks">
       <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QLabel" name="label">
-     <property name="text">
-      <string>&lt;a href=&quot;https://github.com/didier13150/keepassx&quot;&gt;https://github.com/didier13150/keepassx&lt;/a&gt;</string>
      </property>
     </widget>
    </item>
