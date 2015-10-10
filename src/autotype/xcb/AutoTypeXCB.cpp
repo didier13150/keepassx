@@ -31,11 +31,12 @@ AutoTypePlatformX11::AutoTypePlatformX11()
     m_dpy = QX11Info::display();
     m_rootWindow = QX11Info::appRootWindow();
 
-    m_atomWmState = XInternAtom(m_dpy, "WM_STATE", true);
-    m_atomWmName = XInternAtom(m_dpy, "WM_NAME", true);
-    m_atomNetWmName = XInternAtom(m_dpy, "_NET_WM_NAME", true);
-    m_atomString = XInternAtom(m_dpy, "STRING", true);
-    m_atomUtf8String = XInternAtom(m_dpy, "UTF8_STRING", true);
+    m_atomWmState = XInternAtom(m_dpy, "WM_STATE", True);
+    m_atomWmName = XInternAtom(m_dpy, "WM_NAME", True);
+    m_atomNetWmName = XInternAtom(m_dpy, "_NET_WM_NAME", True);
+    m_atomString = XInternAtom(m_dpy, "STRING", True);
+    m_atomUtf8String = XInternAtom(m_dpy, "UTF8_STRING", True);
+    m_atomNetActiveWindow = XInternAtom(m_dpy, "_NET_ACTIVE_WINDOW", True);
 
     m_classBlacklist << "desktop_window" << "gnome-panel"; // Gnome
     m_classBlacklist << "kdesktop" << "kicker"; // KDE 3
@@ -117,12 +118,12 @@ bool AutoTypePlatformX11::registerGlobalShortcut(Qt::Key key, Qt::KeyboardModifi
     uint nativeModifiers = qtToNativeModifiers(modifiers);
 
     startCatchXErrors();
-    XGrabKey(m_dpy, keycode, nativeModifiers, m_rootWindow, true, GrabModeAsync, GrabModeAsync);
-    XGrabKey(m_dpy, keycode, nativeModifiers | Mod2Mask, m_rootWindow, true, GrabModeAsync,
+    XGrabKey(m_dpy, keycode, nativeModifiers, m_rootWindow, True, GrabModeAsync, GrabModeAsync);
+    XGrabKey(m_dpy, keycode, nativeModifiers | Mod2Mask, m_rootWindow, True, GrabModeAsync,
              GrabModeAsync);
-    XGrabKey(m_dpy, keycode, nativeModifiers | LockMask, m_rootWindow, true, GrabModeAsync,
+    XGrabKey(m_dpy, keycode, nativeModifiers | LockMask, m_rootWindow, True, GrabModeAsync,
              GrabModeAsync);
-    XGrabKey(m_dpy, keycode, nativeModifiers | Mod2Mask | LockMask, m_rootWindow, true,
+    XGrabKey(m_dpy, keycode, nativeModifiers | Mod2Mask | LockMask, m_rootWindow, True,
              GrabModeAsync, GrabModeAsync);
     stopCatchXErrors();
 
@@ -235,7 +236,7 @@ QString AutoTypePlatformX11::windowTitle(Window window, bool useBlacklist)
 
     // the window manager spec says we should read _NET_WM_NAME first, then fall back to WM_NAME
 
-    int retVal = XGetWindowProperty(m_dpy, window, m_atomNetWmName, 0, 1000, false, m_atomUtf8String,
+    int retVal = XGetWindowProperty(m_dpy, window, m_atomNetWmName, 0, 1000, False, m_atomUtf8String,
                                     &type, &format, &nitems, &after, &data);
 
     if ((retVal == 0) && data) {
@@ -358,7 +359,7 @@ bool AutoTypePlatformX11::isTopLevelWindow(Window window)
     unsigned long nitems;
     unsigned long after;
     unsigned char* data = nullptr;
-    int retVal = XGetWindowProperty(m_dpy, window, m_atomWmState, 0, 0, false, AnyPropertyType, &type, &format,
+    int retVal = XGetWindowProperty(m_dpy, window, m_atomWmState, 0, 0, False, AnyPropertyType, &type, &format,
                                     &nitems, &after, &data);
     if (data) {
         XFree(data);
@@ -540,7 +541,7 @@ void AutoTypePlatformX11::stopCatchXErrors()
 {
     Q_ASSERT(m_catchXErrors);
 
-    XSync(m_dpy, false);
+    XSync(m_dpy, False);
     XSetErrorHandler(m_oldXErrorHandler);
     m_catchXErrors = false;
 }
@@ -593,7 +594,14 @@ void AutoTypePlatformX11::SendEvent(XKeyEvent* event, int event_type)
     int (*oldHandler) (Display*, XErrorEvent*) = XSetErrorHandler(MyErrorHandler);
 
     event->type = event_type;
-    XTestFakeKeyEvent(event->display, event->keycode, event->type == KeyPress, 0);
+    Bool press;
+    if (event->type == KeyPress) {
+        press = True;
+    }
+    else {
+        press = False;
+    }
+    XTestFakeKeyEvent(event->display, event->keycode, press, 0);
     XFlush(event->display);
 
     XSetErrorHandler(oldHandler);
@@ -789,4 +797,38 @@ void AutoTypeExecturorX11::execKey(AutoTypeKey* action)
 int AutoTypePlatformX11::initialTimeout()
 {
     return 500;
+}
+
+bool AutoTypePlatformX11::raiseWindow(WId window)
+{
+    if (m_atomNetActiveWindow == None) {
+        return false;
+    }
+
+    XRaiseWindow(m_dpy, window);
+
+    XEvent event;
+    event.xclient.type = ClientMessage;
+    event.xclient.serial = 0;
+    event.xclient.send_event = True;
+    event.xclient.window = window;
+    event.xclient.message_type = m_atomNetActiveWindow;
+    event.xclient.format = 32;
+    event.xclient.data.l[0] = 1; // FromApplication
+    event.xclient.data.l[1] = QX11Info::appUserTime();
+    QWidget* activeWindow = QApplication::activeWindow();
+    if (activeWindow) {
+        event.xclient.data.l[2] = activeWindow->internalWinId();
+    }
+    else {
+        event.xclient.data.l[2] = 0;
+    }
+    event.xclient.data.l[3] = 0;
+    event.xclient.data.l[4] = 0;
+    XSendEvent(m_dpy, m_rootWindow, False,
+               SubstructureRedirectMask | SubstructureNotifyMask,
+               &event);
+    XFlush(m_dpy);
+
+    return true;
 }
