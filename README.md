@@ -4,7 +4,7 @@ This forked repository is used to extend functionality of KeepassX:
 
 * ~~Show/Hide main window by a system tray icon.~~ Implemented on upstream
 * Improve system tray menu by adding Close all databases and Lock database
-* Add DBUS support (usefull to manage databases automatically on events like login, logout, etc...)
+* Add DBUS support on Unice systems (usefull to manage databases automatically on events like login, logout, etc...)
 
 Changes will be submited to original KeepassX by pull requests.
 
@@ -23,6 +23,44 @@ Make sure interface name is org.keepassx.MainWindow
 Regenerate Adaptor source files from DBus XML
 
     qdbusxml2cpp -c MainWindowAdaptor -a MainWindowAdaptor.h:MainWindowAdaptor.cpp org.keepassx.MainWindow.xml
+
+## Cross-compilation
+
+This howto is based on Fedora 22 and then deps are closed to this distribution. However, cross-compilation and build setup processes may be done on other distribution.
+
+### Win32
+
+Install deps
+    dnf install mingw32-binutils mingw32-gcc mingw32-gcc-c++ 
+    dnf install mingw32-qt5-qtbase mingw32-qt5-qttools mingw32-qt5-qtbase-devel
+    dnf install mingw32-libgcrypt mingw32-zlib
+
+Cross-compile
+    mkdir win32
+    cd win32
+    cmake -DCMAKE_TOOLCHAIN_FILE=../win32.cmake -DQt5Core_DIR:PATH=/usr/i686-w64-mingw32/sys-root/mingw/lib/cmake/Qt5Core -DQt5Gui_DIR:PATH=/usr/i686-w64-mingw32/sys-root/mingw/lib/cmakeQt5Gui -DQt5LinguistTools_DIR:PATH=/usr/i686-w64-mingw32/sys-root/mingw/lib/cmake/Qt5LinguistTools -DQt5Test_DIR:PATH=/usr/i686-w64-mingw32/sys-root/mingw/lib/cmake/Qt5Test -DQt5Widgets_DIR:PATH=/usr/i686-w64-mingw32/sys-root/mingw/lib/cmake/Qt5Widgets -DQt5Concurrent_DIR:PATH=/usr/i686-w64-mingw32/sys-root/mingw/lib/cmake/Qt5Concurrent -DGCRYPT_INCLUDE_DIR=/usr/i686-w64-mingw32/sys-root/mingw/include -DGCRYPT_LIBRARIES:FILEPATH=/usr/i686-w64-mingw32/sys-root/mingw/bin/libgcrypt-20.dll -DZLIB_INCLUDE_DIR:PATH=/usr/i686-w64-mingw32/sys-root/mingw/include -DZLIB_LIBRARY:FILEPATH=/usr/i686-w64-mingw32/sys-root/mingw/bin/zlib1.dll ..
+    make
+
+Build windows setup application
+    cd ..
+    ./create-win-setup.sh -a i686
+
+### Win64
+
+Install deps
+    dnf install mingw64-binutils mingw64-gcc mingw64-gcc-c++
+    dnf install mingw64-qt5-qtbase mingw64-qt5-qttools mingw64-qt5-qtbase-devel
+    dnf install mingw64-libgcrypt mingw64-zlib
+
+Cross-compile
+    mkdir win64
+    cd win64
+    cmake -DCMAKE_TOOLCHAIN_FILE=../win64.cmake -DQt5Core_DIR:PATH=/usr/x86_64-w64-mingw32/sys-root/mingw/lib/cmake/Qt5Core -DQt5Gui_DIR:PATH=/usr/x86_64-w64-mingw32/sys-root/mingw/lib/cmakeQt5Gui -DQt5LinguistTools_DIR:PATH=/usr/x86_64-w64-mingw32/sys-root/mingw/lib/cmake/Qt5LinguistTools -DQt5Test_DIR:PATH=/usr/x86_64-w64-mingw32/sys-root/mingw/lib/cmake/Qt5Test -DQt5Widgets_DIR:PATH=/usr/x86_64-w64-mingw32/sys-root/mingw/lib/cmake/Qt5Widgets -DQt5Concurrent_DIR:PATH=/usr/x86_64-w64-mingw32/sys-root/mingw/lib/cmake/Qt5Concurrent -DGCRYPT_INCLUDE_DIR=/usr/x86_64-w64-mingw32/sys-root/mingw/include -DGCRYPT_LIBRARIES:FILEPATH=/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libgcrypt-20.dll -DZLIB_INCLUDE_DIR:PATH=/usr/x86_64-w64-mingw32/sys-root/mingw/include -DZLIB_LIBRARY:FILEPATH=/usr/x86_64-w64-mingw32/sys-root/mingw/bin/zlib1.dll ..
+    make
+
+Create windows setup application
+    cd ..
+    ./create-win-setup.sh -a x86_64
 
 ## About
 
