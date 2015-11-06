@@ -1,0 +1,4 @@
+SET(CMAKE_SYSTEM_NAME Windows)
+include(CMakeForceCompiler)
+CMAKE_FORCE_C_COMPILER(x86_64-w64-mingw32-gcc GNU)
+CMAKE_FORCE_CXX_COMPILER(x86_64-w64-mingw32-g++ GNU)
