@@ -5,6 +5,7 @@ This forked repository is used to extend functionality of KeepassX:
 * ~~Show/Hide main window by a system tray icon.~~ Implemented on upstream
 * Improve system tray menu by adding Close all databases and Lock database
 * Add DBUS support on Unice systems (usefull to manage databases automatically on events like login, logout, etc...)
+* Add make target (winsetup) to make Wind*ws Setup application (from fedora)
 
 Changes will be submited to original KeepassX by pull requests.
 
@@ -31,36 +32,43 @@ This howto is based on Fedora 22 and then deps are closed to this distribution. 
 ### Win32
 
 Install deps
+
     dnf install mingw32-binutils mingw32-gcc mingw32-gcc-c++ 
     dnf install mingw32-qt5-qtbase mingw32-qt5-qttools mingw32-qt5-qtbase-devel
     dnf install mingw32-libgcrypt mingw32-zlib
 
 Install Win application (with wine) to build KeePassX installation setup. Download it from [Inno Setup website](http://www.jrsoftware.org/isdl.php)
+
     wine isetup-5.5.6.exe
     
 Cross-compile
+
     mkdir win32
     cd win32
     cmake -DCMAKE_TOOLCHAIN_FILE=../win32.cmake  ..
     make
 
 Build windows installation setup
+
     make winsetup
 
 ### Win64
 
 Install deps
+
     dnf install mingw64-binutils mingw64-gcc mingw64-gcc-c++
     dnf install mingw64-qt5-qtbase mingw64-qt5-qttools mingw64-qt5-qtbase-devel
     dnf install mingw64-libgcrypt mingw64-zlib
 
 Cross-compile
+
     mkdir win64
     cd win64
     cmake -DCMAKE_TOOLCHAIN_FILE=../win64.cmake  ..
     make
 
 Create windows installation setup
+
     make winsetup
 
 ## About
