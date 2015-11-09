@@ -20,6 +20,7 @@
 
 #include <QCloseEvent>
 #include <QShortcut>
+#include <QTimer>
 
 #include "autotype/AutoType.h"
 #include "core/Config.h"
@@ -456,13 +457,13 @@ void MainWindow::closeEvent(QCloseEvent* event)
     }
 }
 
-void MainWindow::changeEvent(QEvent *event)
+void MainWindow::changeEvent(QEvent* event)
 {
     if ((event->type() == QEvent::WindowStateChange) && isMinimized()
             && isTrayIconEnabled() && config()->get("GUI/MinimizeToTray").toBool())
     {
         event->ignore();
-        hide();
+        QTimer::singleShot(0, this, SLOT(hide()));
     }
     else {
         QMainWindow::changeEvent(event);
@@ -605,10 +606,12 @@ void MainWindow::trayIconTriggered(QSystemTrayIcon::ActivationReason reason)
 
 void MainWindow::toggleWindow()
 {
-    if (QApplication::activeWindow() == this) {
+    if ((QApplication::activeWindow() == this) && isVisible() && !isMinimized()) {
         hide();
     }
     else {
+        ensurePolished();
+        setWindowState(windowState() & ~Qt::WindowMinimized);
         show();
         raise();
         activateWindow();
@@ -627,8 +630,13 @@ void MainWindow::lockDatabasesAfterInactivity()
 
 bool MainWindow::isTrayIconEnabled() const
 {
+#ifdef Q_OS_MAC
+    // systray not useful on OS X
+    return false;
+#else
     return config()->get("GUI/ShowTrayIcon").toBool()
             && QSystemTrayIcon::isSystemTrayAvailable();
+#endif
 }
 
 void MainWindow::exit()
