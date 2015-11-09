@@ -1,9 +1,7 @@
 #!/bin/bash
 
-ARCH=i686
-BUILD_WIN_DIR=win32
-#ARCH=x86_64
-#BUILD_WIN_DIR=win64
+#ARCH can be i686 or x86_64
+ARCH=@WIN_BUILD_ARCH@
 
 DLLS=(
 libstdc++-6.dll
@@ -24,14 +22,8 @@ libbz2-1.dll
 libintl-8.dll
 iconv.dll
 libEGL.dll
-)
-
-DLLS_W32=(
-libgcc_s_sjlj-1.dll
-)
-
-DLLS_W64=(
-libgcc_s_seh-1.dll
+#libgcc_s_sjlj-1.dll is 32bits only
+#libgcc_s_seh-1.dll is 64bits only
 )
 
 PLATFORM_DLLS=(
@@ -48,25 +40,9 @@ function showhelp() {
 }
 
 # process command line arguments
-while getopts "?ha:" opt
+while getopts "?h" opt
 do
         case "${opt}" in
-                a)
-			arch=${OPTARG}
-			if [ "${arch}" == "x86_64" ]
-			then
-				ARCH="${arch}"
-				BUILD_WIN_DIR="win64"
-			elif [ "${arch}" == "i686" ]
-			then
-				ARCH="${arch}"
-				BUILD_WIN_DIR="win32"
-			else
-				echo "Unknown arch: ${arch}"
-				showhelp
-				exit 1
-			fi
-                        ;;
                 h|\?)
                         showhelp
                         exit 0
@@ -86,16 +62,10 @@ do
 done
 if [ "${ARCH}" == "i686" ]
 then
-	for dll in ${DLLS_W32[@]}
-	do
-		cp /usr/${ARCH}-w64-mingw32/sys-root/mingw/bin/$dll keepassx/
-	done
+	cp /usr/${ARCH}-w64-mingw32/sys-root/mingw/bin/libgcc_s_sjlj-1.dll keepassx/
 elif [ "${ARCH}" == "x86_64" ]
 then
-	for dll in ${DLLS_W64[@]}
-	do
-		cp /usr/${ARCH}-w64-mingw32/sys-root/mingw/bin/$dll keepassx/
-	done
+	cp /usr/${ARCH}-w64-mingw32/sys-root/mingw/bin/libgcc_s_seh-1.dll keepassx/
 fi
 for dll in ${PLATFORM_DLLS[@]}
 do
@@ -103,19 +73,20 @@ do
 done
 
 # Copy fresh compiled binary
-cp ${BUILD_WIN_DIR}/src/keepassx.exe keepassx/
+cp src/*.exe keepassx/
 
 # Copy icon
-cp share/windows/keepassx.ico keepassx/res
+cp ../share/windows/keepassx.ico keepassx/res
 
 # Copy icons, translations and readme files
-cp -r share/icons keepassx/share
+cp -r ../share/icons keepassx/share
 mkdir -p keepassx/share/translations/
-cp ${BUILD_WIN_DIR}/share/translations/*.qm keepassx/share/translations/
+cp share/translations/*.qm keepassx/share/translations/
 for filename in COPYING AUTHORS CHANGELOG README.md
 do
-	cp $filename keepassx/
+	cp ../$filename keepassx/share/
 done
+cp ../LICENSE* keepassx/share/
 
 # Copy InnoSetup conf
 cp keepassx.iss keepassx/setup
@@ -123,7 +94,8 @@ cp keepassx.iss keepassx/setup
 # Create Windows Setup application
 pushd keepassx/setup
 ../../iscc keepassx.iss
-mv KeePassX*.exe ../../${BUILD_WIN_DIR}/
+name=$(find . -name 'KeePassX*.exe')
+mv ${name} ../../${name%.exe}.@WIN_ARCH@.exe
 popd
 
 # Clean temp dir

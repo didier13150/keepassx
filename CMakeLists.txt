@@ -210,3 +210,24 @@ endif(WITH_TESTS)
 if(PRINT_SUMMARY)
   feature_summary(WHAT ALL)
 endif()
+
+
+if( WIN_BUILD_ARCH )
+  configure_file( ${KeePassX_SOURCE_DIR}/create-win-setup.sh.cmake
+                  ${KeePassX_BINARY_DIR}/create-win-setup.sh
+                  @ONLY
+                )
+  configure_file( ${KeePassX_SOURCE_DIR}/keepassx.iss.cmake
+                  ${KeePassX_BINARY_DIR}/keepassx.iss
+                  @ONLY
+		)
+  file( COPY ${KeePassX_SOURCE_DIR}/iscc DESTINATION ${KeePassX_BINARY_DIR} )
+
+  add_custom_target( winsetup
+                     bash ./create-win-setup.sh
+                     DEPENDS ${PROGNAME}
+                     WORKING_DIRECTORY ${KeePassX_BINARY_DIR}
+                     COMMENT "Generating Windows Setup application" VERBATIM
+                   )
+
+endif( WIN_BUILD_ARCH )

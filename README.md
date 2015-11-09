@@ -35,15 +35,17 @@ Install deps
     dnf install mingw32-qt5-qtbase mingw32-qt5-qttools mingw32-qt5-qtbase-devel
     dnf install mingw32-libgcrypt mingw32-zlib
 
+Install Win application (with wine) to build KeePassX installation setup. Download it from [Inno Setup website](http://www.jrsoftware.org/isdl.php)
+    wine isetup-5.5.6.exe
+    
 Cross-compile
     mkdir win32
     cd win32
-    cmake -DCMAKE_TOOLCHAIN_FILE=../win32.cmake -DQt5Core_DIR:PATH=/usr/i686-w64-mingw32/sys-root/mingw/lib/cmake/Qt5Core -DQt5Gui_DIR:PATH=/usr/i686-w64-mingw32/sys-root/mingw/lib/cmakeQt5Gui -DQt5LinguistTools_DIR:PATH=/usr/i686-w64-mingw32/sys-root/mingw/lib/cmake/Qt5LinguistTools -DQt5Test_DIR:PATH=/usr/i686-w64-mingw32/sys-root/mingw/lib/cmake/Qt5Test -DQt5Widgets_DIR:PATH=/usr/i686-w64-mingw32/sys-root/mingw/lib/cmake/Qt5Widgets -DQt5Concurrent_DIR:PATH=/usr/i686-w64-mingw32/sys-root/mingw/lib/cmake/Qt5Concurrent -DGCRYPT_INCLUDE_DIR=/usr/i686-w64-mingw32/sys-root/mingw/include -DGCRYPT_LIBRARIES:FILEPATH=/usr/i686-w64-mingw32/sys-root/mingw/bin/libgcrypt-20.dll -DZLIB_INCLUDE_DIR:PATH=/usr/i686-w64-mingw32/sys-root/mingw/include -DZLIB_LIBRARY:FILEPATH=/usr/i686-w64-mingw32/sys-root/mingw/bin/zlib1.dll ..
+    cmake -DCMAKE_TOOLCHAIN_FILE=../win32.cmake  ..
     make
 
-Build windows setup application
-    cd ..
-    ./create-win-setup.sh -a i686
+Build windows installation setup
+    make winsetup
 
 ### Win64
 
@@ -55,12 +57,11 @@ Install deps
 Cross-compile
     mkdir win64
     cd win64
-    cmake -DCMAKE_TOOLCHAIN_FILE=../win64.cmake -DQt5Core_DIR:PATH=/usr/x86_64-w64-mingw32/sys-root/mingw/lib/cmake/Qt5Core -DQt5Gui_DIR:PATH=/usr/x86_64-w64-mingw32/sys-root/mingw/lib/cmakeQt5Gui -DQt5LinguistTools_DIR:PATH=/usr/x86_64-w64-mingw32/sys-root/mingw/lib/cmake/Qt5LinguistTools -DQt5Test_DIR:PATH=/usr/x86_64-w64-mingw32/sys-root/mingw/lib/cmake/Qt5Test -DQt5Widgets_DIR:PATH=/usr/x86_64-w64-mingw32/sys-root/mingw/lib/cmake/Qt5Widgets -DQt5Concurrent_DIR:PATH=/usr/x86_64-w64-mingw32/sys-root/mingw/lib/cmake/Qt5Concurrent -DGCRYPT_INCLUDE_DIR=/usr/x86_64-w64-mingw32/sys-root/mingw/include -DGCRYPT_LIBRARIES:FILEPATH=/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libgcrypt-20.dll -DZLIB_INCLUDE_DIR:PATH=/usr/x86_64-w64-mingw32/sys-root/mingw/include -DZLIB_LIBRARY:FILEPATH=/usr/x86_64-w64-mingw32/sys-root/mingw/bin/zlib1.dll ..
+    cmake -DCMAKE_TOOLCHAIN_FILE=../win64.cmake  ..
     make
 
-Create windows setup application
-    cd ..
-    ./create-win-setup.sh -a x86_64
+Create windows installation setup
+    make winsetup
 
 ## About
 
