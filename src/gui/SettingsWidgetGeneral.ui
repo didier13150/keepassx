@@ -6,66 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>456</width>
-    <height>313</height>
+    <width>542</width>
+    <height>347</height>
    </rect>
   </property>
-  <layout class="QFormLayout" name="formLayout">
-   <property name="fieldGrowthPolicy">
-    <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-   </property>
-   <item row="0" column="0">
-    <widget class="QCheckBox" name="rememberLastDatabasesCheckBox">
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="9" column="0">
+    <widget class="QLabel" name="languageLabel">
      <property name="text">
-      <string>Remember last databases</string>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QCheckBox" name="rememberLastKeyFilesCheckBox">
-     <property name="text">
-      <string>Remember last key files</string>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="0">
-    <widget class="QCheckBox" name="openPreviousDatabasesOnStartupCheckBox">
-     <property name="text">
-      <string>Open previous databases on startup</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="0">
-    <widget class="QCheckBox" name="autoSaveOnExitCheckBox">
-     <property name="text">
-      <string>Automatically save on exit</string>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="0">
-    <widget class="QCheckBox" name="autoSaveAfterEveryChangeCheckBox">
-     <property name="text">
-      <string>Automatically save after every change</string>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="0">
-    <widget class="QCheckBox" name="minimizeOnCopyCheckBox">
-     <property name="text">
-      <string>Minimize when copying to clipboard</string>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="0">
-    <widget class="QCheckBox" name="useGroupIconOnEntryCreationCheckBox">
-     <property name="text">
-      <string>Use group icon on entry creation</string>
+      <string>Language</string>
      </property>
     </widget>
    </item>
@@ -76,34 +25,75 @@
      </property>
     </widget>
    </item>
-   <item row="7" column="1">
+   <item row="0" column="0" colspan="2">
+    <widget class="QCheckBox" name="rememberLastDatabasesCheckBox">
+     <property name="text">
+      <string>Remember last databases</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="2">
+    <widget class="QCheckBox" name="rememberLastKeyFilesCheckBox">
+     <property name="text">
+      <string>Remember last key files</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="2">
+    <widget class="QCheckBox" name="openPreviousDatabasesOnStartupCheckBox">
+     <property name="text">
+      <string>Open previous databases on startup</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0" colspan="2">
+    <widget class="QCheckBox" name="autoSaveOnExitCheckBox">
+     <property name="text">
+      <string>Automatically save on exit</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0" colspan="2">
+    <widget class="QCheckBox" name="autoSaveAfterEveryChangeCheckBox">
+     <property name="text">
+      <string>Automatically save after every change</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="0" colspan="2">
+    <widget class="QCheckBox" name="minimizeOnCopyCheckBox">
+     <property name="text">
+      <string>Minimize when copying to clipboard</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0" colspan="2">
+    <widget class="QCheckBox" name="useGroupIconOnEntryCreationCheckBox">
+     <property name="text">
+      <string>Use group icon on entry creation</string>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="1" colspan="2">
+    <widget class="QComboBox" name="languageComboBox"/>
+   </item>
+   <item row="7" column="1" colspan="2">
     <widget class="ShortcutWidget" name="autoTypeShortcutWidget"/>
    </item>
-   <item row="8" column="0">
+   <item row="8" column="0" colspan="2">
     <widget class="QCheckBox" name="autoTypeEntryTitleMatchCheckBox">
      <property name="text">
       <string>Use entry title to match windows for global auto-type</string>
      </property>
     </widget>
    </item>
-   <item row="9" column="0">
-    <widget class="QLabel" name="languageLabel">
-     <property name="text">
-      <string>Language</string>
-     </property>
-    </widget>
-   </item>
-   <item row="9" column="1">
-    <widget class="QComboBox" name="languageComboBox"/>
-   </item>
-   <item row="10" column="0">
-    <widget class="QCheckBox" name="systrayShowCheckBox">
-     <property name="text">
-      <string>Show a system tray icon</string>
-     </property>
-    </widget>
-   </item>
-   <item row="11" column="0">
+   <item row="11" column="0" colspan="2">
     <widget class="QCheckBox" name="systrayMinimizeToTrayCheckBox">
      <property name="enabled">
       <bool>false</bool>
@@ -112,6 +102,26 @@
       <string>Hide window to system tray when minimized</string>
      </property>
     </widget>
+   </item>
+   <item row="10" column="0" colspan="2">
+    <widget class="QCheckBox" name="systrayShowCheckBox">
+     <property name="text">
+      <string>Show a system tray icon</string>
+     </property>
+    </widget>
+   </item>
+   <item row="12" column="0" colspan="3">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
    </item>
   </layout>
  </widget>
