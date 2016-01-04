@@ -525,8 +525,10 @@ void MainWindow::updateTrayIcon()
             menu->addAction(closeDbAction);
             
             menu->addSeparator();
-            
-            //menu->addAction(m_ui->actionQuit);
+	    
+#ifdef Q_OS_WIN            
+            menu->addAction(m_ui->actionQuit);
+#endif
             
             connect(m_trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
                     SLOT(trayIconTriggered(QSystemTrayIcon::ActivationReason)));
