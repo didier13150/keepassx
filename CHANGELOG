@@ -1,3 +1,26 @@
+2.0.3 (2016-01-16) Didier Fabert <didier.fabert@gmail.com>
+==========================================================
+
+- Sync with upstream
+
+2.0.3 (2016-09-04) Felix Geyer <debfx@fobos.de>
+===============================================
+
+- Improved error reporting when reading / writing databases fails. [#450, #462]
+- Display an error message when opening a custom icon fails.
+- Detect custom icon format based on contents instead of the filename. [#512]
+- Keep symlink intact when saving databases. [#442].
+- Fix a crash when deleting parent group of recycle bin. [#520]
+- Display a confirm dialog before moving an entry to the recycle bin. [#447]
+- Repair UUIDs of inconsistent history items. [#130]
+- Only include top-level windows in auto-type window list when using gnome-shell.
+- Update translations.
+
+2.0.2 (2016-06-15) Didier Fabert <didier.fabert@gmail.com>
+==========================================================
+
+- Sync with upstream
+
 2.0.2 (2016-02-02) Felix Geyer <debfx@fobos.de>
 ===============================================
 
@@ -7,6 +30,8 @@
 
 2.0.1 (2016-01-04) Didier Fabert <didier.fabert@gmail.com>
 ==========================================================
+
+- Sync with upstream
 
 2.0.1 (2016-01-31) Felix Geyer <debfx@fobos.de>
 ===============================================
