@@ -9,6 +9,28 @@ This forked repository is used to extend functionality of KeepassX:
 
 Changes will be submited to original KeepassX by pull requests.
 
+## Using D-BUS
+
+* Open keepassx database: without password and key file
+
+    qdbus org.keepassx.MainWindow /keepassx org.keepassx.MainWindow.openDatabase /path/to/database.kdbx
+
+* Open keepassx database: with password but without key file
+
+    qdbus org.keepassx.MainWindow /keepassx org.keepassx.MainWindow.openDatabase /path/to/database.kdbx passwd
+
+* Open keepassx database: with password and key file
+
+    qdbus org.keepassx.MainWindow /keepassx org.keepassx.MainWindow.openDatabase /path/to/database.kdbx passwd /path/to/key
+
+*  Close all keepassx databases
+
+    qdbus org.keepassx.MainWindow /keepassx org.keepassx.MainWindow.closeAllDatabases
+    
+*  Exit keepassx
+
+    qdbus org.keepassx.MainWindow /keepassx org.keepassx.MainWindow.exit
+
 ## In case of modification about MainWindow class (public method)
 
 Launch following commands directly from src/gui directory:
